@@ -1,10 +1,11 @@
 from pathlib import Path
 import os, stat, subprocess, time
+import argparse
 
-bs_data_dir = Path(r"C:\ProgramData\BlueStacks_nxt")
-bs_program_dir = Path(r"C:\Program Files\BlueStacks_nxt")
-adb_executable = f'\"{bs_program_dir / "HD-Adb.exe"}\"'
-conf_path = bs_data_dir / "bluestacks.conf"
+data_dir = Path(r"C:\ProgramData\BlueStacks_nxt")
+program_dir = Path(r"C:\Program Files\BlueStacks_nxt")
+adb_executable = f'\"{program_dir / "HD-Adb.exe"}\"'
+conf_path = data_dir / "bluestacks.conf"
 
 
 def cmd(cmd_, shell=True, popen=False):
@@ -113,7 +114,7 @@ class ADB:
         self.start(instance)
 
     def start(self, instance):
-        cmd(f"\"{bs_program_dir / 'HD-Player.exe'}\" --instance {instance}", popen=True)
+        cmd(f"\"{program_dir / 'HD-Player.exe'}\" --instance {instance}", popen=True)
 
     def stop(self, instance):
         self.shell(instance, "reboot -p")
@@ -127,27 +128,38 @@ def clear_screen():
     os.system("cls")
 
 
-def instance_menu(conf):
-    select_i_menu = "---Select the instance---\nPlease select from the list below and enter the number."
-    instance_key = []
-    for i, n in enumerate(conf.instance):
-        instance_key.append(n)
-        select_i_menu += f"\n {i + 1}. {conf.instance[n]}"
-    select_i_menu += "\n(type anything else to exit)"
-    r = input(select_i_menu)
-    if r.rstrip().isdigit() and 1 <= int(r) <= len(instance_key) + 1:
-        return instance_key[int(r) - 1]
-    else:
-        return None
-
-
 def main():
+    global data_dir, program_dir, adb_executable
+    parser = argparse.ArgumentParser(description="Simple BlueStacks manager to setting root, adb and so on.")
+
+    parser.add_argument('-d', '--data_dir', help='Path to ProgramData folder')
+    parser.add_argument('-p', '--program_dir', help='Path to ProgramFiles folder')
+    parser.add_argument('-a', '--adb_executable', help="Path to adb.exe")
+
+    args = parser.parse_args()
+    if args.data_dir is not None:
+        data_dir = Path(args.data_dir)
+    if args.program_dir is not None:
+        program_dir = Path(args.program_dir)
+        if args.adb_executable is None:
+            adb_executable = f'\"{program_dir / "HD-Adb.exe"}\"'
+    if args.adb_executable is not None:
+        adb_executable = f'\"{args.adb_executable}\"'
+
     conf = BSConf(conf_path)
     adb = ADB(conf)
     while True:
         clear_screen()
-        instance = instance_menu(conf)
-        if instance is None:
+        select_i_menu = "---Select the instance---\nPlease select from the list below and enter the number."
+        instance_key = []
+        for i, n in enumerate(conf.instance):
+            instance_key.append(n)
+            select_i_menu += f"\n {i + 1}. {conf.instance[n]}"
+        select_i_menu += "\n(type anything else to exit)"
+        r = input(select_i_menu)
+        if r.rstrip().isdigit() and 1 <= int(r) <= len(instance_key) + 1:
+            instance = instance_key[int(r) - 1]
+        else:
             break
 
         while True:
