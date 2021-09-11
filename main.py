@@ -128,7 +128,7 @@ def clear_screen():
 
 
 def instance_menu(conf):
-    select_i_menu = "---Select the instance---"
+    select_i_menu = "---Select the instance---\nPlease select from the list below and enter the number."
     instance_key = []
     for i, n in enumerate(conf.instance):
         instance_key.append(n)
@@ -154,7 +154,8 @@ def main():
             clear_screen()
             root_flag = "Rooted" if conf.get_root_status(instance) else "Not Rooted"
             rw_flag = "Read-only" if conf.is_read_only() else "Writable"
-            select_a_menu = "---Select the action---\n" \
+            select_a_menu = f"---Select the action for {conf.instance[instance]}---\n" \
+                            f"Please select from 1 to 4 below\n" \
                             f" 1. Root/UnRoot ({root_flag})\n" \
                             f" 2. Read/Write ({rw_flag})\n" \
                             f" 3. Start/Stop/Restart\n" \
@@ -176,6 +177,7 @@ def main():
             elif r == "3":
                 clear_screen()
                 select_o_menu = "---Select the operation---\n" \
+                                "Please select from 1 to 3 below\n" \
                                 " 1. Start\n" \
                                 " 2. Stop\n" \
                                 " 3. Restart\n" \
